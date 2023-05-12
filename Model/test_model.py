@@ -3,23 +3,23 @@ import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 import time
 
-# Vos clés API
-API_KEY = 'votre_api_key'
-API_SECRET = 'votre_api_secret'
-BASE_URL = 'https://paper-api.alpaca.markets'  # URL pour le compte de démonstration
+# API
+API_KEY = 'api_key'
+API_SECRET = 'api_secret'
+BASE_URL = 'https://paper-api.alpaca.markets'  # URL demo
 
-# Initialise l'API
+# Initialisation
 api = tradeapi.REST(API_KEY, API_SECRET, base_url=BASE_URL)
 
-# Le symbole que vous voulez trader
+# trade
 symbol = 'AAPL'
 
 def trade(symbol):
-    # Récupère les données du marché
+    # données du marché
     barset = api.get_barset(symbol, 'day', limit=21)
     bars = barset[symbol]
 
-    # Prépare les données pour le modèle ARIMA
+    # Préparation modèle ARIMA
     data = pd.DataFrame([bar.c for bar in bars], columns=['close'])
     data.index = pd.DatetimeIndex([bar.t for bar in bars])
 
@@ -32,7 +32,7 @@ def trade(symbol):
 
     # Si le prix prédit est supérieur au prix actuel, achète l'action
     if forecast > data['close'][-1]:
-        # Récupère le nombre d'actions que vous pouvez acheter
+        # Récupère le nombre d'action
         account = api.get_account()
         cash = float(account.cash)
         price = bars[-1].c
