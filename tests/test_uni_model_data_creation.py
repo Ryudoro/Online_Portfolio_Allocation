@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-from model_data_creation import model_data_creation
+from Model/model_data_creation import model_data_creation
 
 class TestModelDataCreation(unittest.TestCase):
 
