@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 import numpy as np
-from Model/input_creation import search_input
+from Model.input_creation import search_input
 
 class TestSearchInput(unittest.TestCase):
 
