@@ -2,7 +2,7 @@ name: Shell commands
 on: [push]
 jobs:
   run-shell-command:
-    runs-on${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-20.04]
