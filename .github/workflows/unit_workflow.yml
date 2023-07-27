@@ -25,7 +25,7 @@ jobs:
         run: pip install -r requirements.txt  # Assurez-vous que requirements.txt contient les dépendances nécessaires pour vos tests.
 
       - name: Run Unit Tests - test_uni_model_data_creation.py
-        run: python -m unittest test_uni_model_data_creation.py
+        run: python -m unittest tests/test_uni_model_data_creation.py
 
       - name: Run Unit Tests - test_uni_search_input.py
-        run: python -m unittest test_uni_search_input.py
+        run: python -m unittest tests/test_uni_search_input.py
