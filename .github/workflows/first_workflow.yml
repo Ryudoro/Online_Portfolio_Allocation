@@ -7,5 +7,5 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-20.04]
     steps:
-      -  name: echo a string
-         run: echo "Hello world"
+      - name: echo a string
+        run: echo "Hello world"
