@@ -1,0 +1,31 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt  # Assurez-vous que requirements.txt contient les dépendances nécessaires pour vos tests.
+
+      - name: Run Unit Tests - test_uni_model_data_creation.py
+        run: python -m unittest test_uni_model_data_creation.py
+
+      - name: Run Unit Tests - test_uni_search_input.py
+        run: python -m unittest test_uni_search_input.py
