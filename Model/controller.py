@@ -6,6 +6,7 @@ from model_data_creation import model_data_creation
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import joblib
 
 days_for_training = 500
 days_for_testing = 0
@@ -13,8 +14,9 @@ days_in_future = 50
 name_of_company = 'ALO.PA'
 name_of_model = 'trained_model_'+name_of_company.replace('.','')+'.h5'
 data, data_to_use = search_input(name_of_company)
-x_train, y_train, X_test, scaler = model_data_creation(data_to_use)
+x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)
 model = model_creation(x_train)
+joblib.dump(scaler, 'scaler.pkl')
 
 if not os.path.exists(name_of_model):
     model_compilation(x_train, y_train, name_of_model)
