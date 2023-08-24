@@ -4,7 +4,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Ryudoro/Online_Portfolio_Allocation.git'
+                script {
+                    checkout scm
+                }
             }
         }
         
