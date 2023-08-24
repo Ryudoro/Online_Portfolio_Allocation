@@ -1,16 +1,20 @@
-import yfinance as yf
+
 
 class InvalidInputError(Exception):
     pass
 
 stocks_list = ['GOOGL', 'AAPL', 'ALO.PA']
-def search_input(stock_symbol, period = '5y'):
+def search_input(stock_symbol = 'ALO.PA', period = '5y', jenkins = True):
     # Récupérer les données du stock
     is_valid = is_input_valid(stock_symbol, period)
     if not is_valid:
         return None, None
-    
-    data = yf.download(stock_symbol, period= period)
+    if jenkins == True:
+        import pandas as pd
+        data = pd.read_csv('ALO.csv')
+    else:
+        import yfinance as yf
+        data = yf.download(stock_symbol, period= period)
     #data = pd.DataFrame(data)
     # Choix de la colonne à prédire
     target_column = 'Close'  
@@ -30,7 +34,4 @@ def is_input_valid(stock_symbol, period):
         return False
     return True
 
-stock_symbol = 'GOOGL'
-data, data_to_use = search_input(stock_symbol)
-
-print(len(data_to_use.shape))
+data, data_to_use = search_input()

@@ -1,56 +1,53 @@
 pipeline {
     agent any
-
+    
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/votre-utilisateur/votre-repo.git'
+                git 'https://github.com/Ryudoro/Online_Portfolio_Allocation.git'
             }
         }
-
-        stage('Build & Unit Tests') {
+        
+        stage('Install Dependencies') {
             steps {
                 sh 'pip install -r requirements.txt'
-                sh 'python -m unittest tests.py'
             }
         }
-
-        stage('Train Model') {
+        
+        stage('Data Preparation and Model Training') {
             steps {
-                sh 'python train_model.py'
+                sh 'python Model/input_creation.py'
+                // sh 'python model_training.py'
             }
         }
-
-        stage('Predict Future') {
+        
+        // stage('Predictions and Visualization') {
+        //     steps {
+        //         sh 'python make_predictions.py'
+        //         sh 'python visualize_results.py'
+        //     }
+        // }
+        
+        stage('Tests') {
             steps {
-                sh 'python predict_future.py'
+                sh 'python -m unittest discover tests'
             }
         }
-
-        stage('Visualization') {
-            steps {
-                sh 'python visualize_results.py'
-            }
-        }
-
-        stage('Deploy (Optional)') {
-            when {
-                branch 'master'
-            }
-            steps {
-                sh 'python deploy_model.py'
-            }
-        }
+        
+        // stage('Deploy (Optional)') {
+        //     when {
+        //         branch 'master'
+        //     }
+        //     steps {
+        //         sh 'python deploy.py'
+        //     }
+        // }
     }
-
+    
     post {
         always {
-            archiveArtifacts artifacts: 'trained_model_ALOPA.h5', fingerprint: true
-        }
-        success {
-            script {
-                build(job: 'Airflow_Job_Name')
-            }
+            archiveArtifacts artifacts: '**/*', allowEmptyArchive: true
         }
     }
 }
+
