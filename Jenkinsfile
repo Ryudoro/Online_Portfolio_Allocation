@@ -9,13 +9,13 @@ pipeline {
                 }
             }
         }
-        stage('Install Python') {
-            steps {
-                script {
-                    sh 'apt-get update && apt-get install -y python3'
-                }
-            }
-        }
+        // stage('Install Python') {
+        //     steps {
+        //         script {
+        //             sh 'apt-get update && apt-get install -y python3'
+        //         }
+        //     }
+        // }
         stage('Install Dependencies') {
             steps {
                 sh 'pip install -r requirements.txt'
@@ -24,7 +24,7 @@ pipeline {
         
         stage('Data Preparation and Model Training') {
             steps {
-                sh 'python Model/input_creation.py'
+                sh 'python3 Model/input_creation.py'
                 // sh 'python model_training.py'
             }
         }
@@ -38,7 +38,7 @@ pipeline {
         
         stage('Tests') {
             steps {
-                sh 'python -m unittest discover tests'
+                sh 'python3 -m unittest discover tests'
             }
         }
         
