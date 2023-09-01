@@ -2,3 +2,7 @@ numpy
 pandas
 yfinance
 matplotlib
+flask
+tensorflow
+scikit-learn
+apache-airflow

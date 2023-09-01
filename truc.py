@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import load_model
+import pandas as pd
 
 days_for_training = 500
 days_for_testing = 0
-days_in_future = 50
-name_of_company = 'ALO.PA'
+days_in_future = 200
+name_of_company = 'GOOGL'
 name_of_model = 'trained_model_'+name_of_company.replace('.','')+'.h5'
 #data, data_to_use = search_input(name_of_company)
 
@@ -75,5 +76,9 @@ prediction_list = prediction_list[days_for_training-1:]
 # Inverse the normalization
 predicted_future = scaler.inverse_transform(prediction_list.reshape(-1, 1))
 
-plt.plot(predicted_future)
+last_date = data.index[-1]
+date_index_future = pd.date_range(start=last_date, periods=days_in_future+1) 
+
+plt.scatter(date_index_future[1:], predicted_future[:-1], s=1)
+plt.scatter(data.index, data_to_use, s=1)
 plt.show()

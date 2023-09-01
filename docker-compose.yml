@@ -1,0 +1,18 @@
+version: '3'
+services:
+  airflow:
+    build:
+      context: .
+    volumes:
+      - ./Model:/app/Model  # Montez le dossier Model dans le conteneur
+      - ./airflow_run.py:/app/airflow_run.py  # Montez le fichier Airflow
+    command: ["airflow", "scheduler"]  # Commande à exécuter dans le conteneur
+
+  api:
+    build:
+      context: .
+    ports:
+      - "5000:5000"  # Exposez le port de l'API
+    volumes:
+      - ./API:/app/API  # Montez le dossier API dans le conteneur
+    command: ["python", "/app/API/test_flask.py"]  # Commande à exécuter pour lancer l'API

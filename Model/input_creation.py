@@ -1,4 +1,4 @@
-
+# Model
 
 class InvalidInputError(Exception):
     pass

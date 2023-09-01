@@ -7,33 +7,47 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import joblib
-
+import sys
+import numpy as np
+global_dir = '/home/project/Documents/Online_Portfolio_Allocation'
+sys.path.append(global_dir)
+from Stats.statistics import bollinger
 days_for_training = 500
 days_for_testing = 0
-days_in_future = 50
-name_of_company = 'ALO.PA'
-name_of_model = 'trained_model_'+name_of_company.replace('.','')+'.h5'
-data, data_to_use = search_input(name_of_company)
+days_in_future = 1
+name_of_company = 'GOOGL'
+#name_of_model = 'trained_model_'+name_of_company.replace('.','')+'.h5'
+name_of_model = 'test.h5'
+data, data_to_use = search_input(name_of_company, jenkins = False)
 x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)
-model = model_creation(x_train)
-joblib.dump(scaler, 'scaler.pkl')
+# model = model_creation(x_train, y_train)
+# joblib.dump(scaler, 'scaler.pkl')
+# model.save(name_of_model)
 
-if not os.path.exists(name_of_model):
-    model_compilation(x_train, y_train, name_of_model)
+# if not os.path.exists(name_of_model):
+#     model_compilation(x_train, y_train, name_of_model)
 
 if len(X_test) != 0:
     last_days_for_input = X_test[-1]
 else:
     last_days_for_input = x_train[-1]
 
-predicted_future = load_model_and_predict(name_of_model, days_in_future, last_days_for_input, scaler, days_for_training)
 
+
+predicted_future = load_model_and_predict(name_of_model, days_in_future, last_days_for_input, scaler, days_for_training)
+print("last value is ", last_days_for_input[-1])
+print("predicted value is ", scaler.transform(predicted_future))
 last_date = data.index[-1]
 
+boll_down, boll_up = bollinger(pd.Series(last_days_for_input.reshape(-1)))
+
+print(boll_down.iloc[-1])
+plt.plot(boll_down)
+plt.plot(boll_up)
 # Create a new date index for the future predictions
 date_index_future = pd.date_range(start=last_date, periods=days_in_future+1)  # Adding 1 because date_range is exclusive of the endpoint
 
 # Plotting data
-plt.plot(date_index_future[1:], predicted_future[:-1], color='green', label='Prix prédit')  # Starting from index 1 because date_index_future includes the last_date
+#plt.plot(date_index_future[1:], predicted_future[:-1], color='green', label='Prix prédit')  # Starting from index 1 because date_index_future includes the last_date
 
 plt.show()

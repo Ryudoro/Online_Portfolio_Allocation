@@ -26,16 +26,16 @@ def main():
     plot(data)
 
 
-data = yf.download('AAPL', period = '1y')
-a,b = bollinger(data)
-# main()
+# data = yf.download('AAPL', period = '1y')
+# a,b = bollinger(data)
+# # main()
+# # plt.show()
+
+# # print(a)
+# # print(b)
+
+# plt.plot(a.index, a['Close'])
+# plt.plot(b.index, b['Close'])
+# plt.plot(data.index, data['Close'])
+
 # plt.show()
-
-# print(a)
-# print(b)
-
-plt.plot(a.index, a['Close'])
-plt.plot(b.index, b['Close'])
-plt.plot(data.index, data['Close'])
-
-plt.show()

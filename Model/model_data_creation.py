@@ -5,13 +5,13 @@ from sklearn.preprocessing import MinMaxScaler
 # days_for_training = 500
 # days_for_testing = 1
 
-def model_data_creation(data_to_use, days_for_training, days_for_testing):
+def model_data_creation(data_to_use, days_for_training = 100, days_for_testing =0):
 
     # Préparation des données pour l'entraînement
     scaler = MinMaxScaler(feature_range=(0,1))
     
 
-    is_valid = is_data_valid(data_to_use, days_for_training, days_for_testing)
+    is_valid = is_data_valid(data_to_use, days_for_training = 100, days_for_testing =0)
     if not is_valid:
         return None, None, None, scaler
     
@@ -55,6 +55,3 @@ data_to_use = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 days_for_training = 5
 days_for_testing = 3
 x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)
-print(x_train)
-print(X_test)
-print(y_train)
