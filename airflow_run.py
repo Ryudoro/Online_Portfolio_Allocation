@@ -7,6 +7,8 @@ import joblib
 import sys
 global_dir = '/home/project/Documents/Online_Portfolio_Allocation'
 sys.path.append(global_dir)
+sys.path.append(global_dir)
+global_dir2 = '/apps'
 
 from Model.input_creation import search_input
 from Model.model_data_creation import model_data_creation

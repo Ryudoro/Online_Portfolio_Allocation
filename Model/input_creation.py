@@ -11,7 +11,7 @@ def search_input(stock_symbol = 'ALO.PA', period = '5y', jenkins = True):
         return None, None
     if jenkins == True:
         import pandas as pd
-        data = pd.read_csv('ALO.csv')
+        data = pd.read_csv('Model/ALO.csv')
     else:
         import yfinance as yf
         data = yf.download(stock_symbol, period= period)

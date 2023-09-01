@@ -6,7 +6,9 @@ services:
     volumes:
       - ./Model:/app/Model  # Montez le dossier Model dans le conteneur
       - ./airflow_run.py:/app/airflow_run.py  # Montez le fichier Airflow
-    command: ["airflow", "scheduler"]  # Commande à exécuter dans le conteneur
+    ports:
+      - "8080:8080"
+    command: ["bash", "-c", "airflow db init && airflow webserver && airflow scheduler"]  # Commande à exécuter dans le conteneur
 
   api:
     build:

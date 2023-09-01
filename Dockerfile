@@ -15,5 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Exposez le port pour l'API Flask
 EXPOSE 5000
 
+
 # Exécutez Airflow
+CMD ["airflow"], ["db"], ['init']
 CMD ["airflow", "scheduler"]
