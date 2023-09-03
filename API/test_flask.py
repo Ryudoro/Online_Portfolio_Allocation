@@ -2,12 +2,16 @@
 from flask import Flask, request, jsonify
 import sys
 import os
-global_dir = '/home/project/Documents/Online_Portfolio_Allocation'
+global_dir = '/home/supersymmetry/Documents/Online_Portfolio_Allocation'
 sys.path.append(global_dir)
+global_dir2 = '/app'
+sys.path.append(global_dir2)
 from Model.input_creation import search_input
 from Model.model_data_creation import model_data_creation
 from Model.model_creation import model_creation
+from Model.futur_prediction import predict_future
 from tensorflow.keras.models import load_model
+from tensorflow.keras.models import model_from_json
 import numpy as np
 import joblib
 import json
@@ -34,7 +38,7 @@ def get_data():
 
 @app.route('/api/get_stock_data', methods=['GET'])
 def get_stock_data():
-    
+
     stock_symbol = request.args.get('stock_symbol')
     period = '5y'
     jenkins = False
@@ -53,9 +57,9 @@ def get_stock_data():
 
 @app.route('/api/prepare_data', methods=['POST'])
 def prepare_data():
-
+    print("a")
     #request_data = request.args.get()
-    request_data = request.json
+    request_data = request.get_json()
     data_to_use = np.array(request_data['data_to_use'])
     days_for_training = int(request_data['days_for_training'])
     days_for_testing = int(request_data['days_for_testing'])
@@ -63,7 +67,7 @@ def prepare_data():
     
     x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)
 
-    scaler_name = os.path.join(global_dir, f"scaler_{name_of_compagny.replace('.', '')}.pkl")
+    scaler_name = os.path.join(global_dir2, f"Model_stock/scaler{name_of_compagny.replace('.', '')}.pkl")
     joblib.dump(scaler, scaler_name)
     response = {
         'x_train': x_train.tolist(),
@@ -73,7 +77,7 @@ def prepare_data():
 
     return jsonify(response)
 
-@app.route('/API/model_creation', methods = ['POST'])
+@app.route('/api/model_creation', methods = ['POST'])
 def create_model():
     request_data = request.get_json()
     
@@ -87,19 +91,34 @@ def create_model():
     response = {'model' : 'Creation Successful'}
     return jsonify(response)
 
-@app.route('/API/load_model', methods = ['POST'])
-def load_model():
+@app.route('/api/load_model', methods = ['POST'])
+def load_models():
     request_data = request.get_json()
-    
     liste_action = request_data['option_action']
-    name = request_data['model_name']
     liste_model = []
-    
+
     for action in liste_action:
-        liste_model.append(load_model(name))
+        name = 'Model_stock/trained_model_'+action.replace('.','')+'.h5'
+        liste_model.append(load_model(name).to_json())
         
     return jsonify(liste_model)
     
+@app.route('/api/predict_futur', methods = ['POST'])
+def predict_futur():
+    request_data = request.get_json()
+    days_in_futur = request_data['days_in_futur']
+    model = model_from_json(request_data['model'])
+    last_days_for_input = np.array(request_data['last_days_for_input'])
+    #scaler = request_data['scaler']
+    days_for_training = request_data['days_for_training']
+    name_of_compagny = request_data['name_of_compagny']
+    
+    scaler = joblib.load(os.path.join('Model_stock', 'scaler'+ name_of_compagny.replace('.', '')+'.pkl'))
+    futur_prediction = predict_future(days_in_futur, model, last_days_for_input, scaler, days_for_training)
+    
+    response = {'futur_prediction' : futur_prediction.tolist()}    
+    return jsonify(response)
+
 # @app.route('/API/model_compilation', methods = ['POST'])
 # def compile_model():
 #     request_data = request.get_json()
