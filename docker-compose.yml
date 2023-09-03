@@ -3,13 +3,19 @@ services:
   airflow:
     build:
       context: .
+      dockerfile: Dockerfile
     volumes:
       - ./Model:/app/Model  # Montez le dossier Model dans le conteneur
       - ./airflow_run.py:/app/airflow_run.py  # Montez le fichier Airflow
+      - ./Model_stock:/app/Model_stock
+      - ./airflow.cfg:/app/airflow2.cfg
     ports:
       - "8080:8080"
-    command: ["bash", "-c", "airflow db init && airflow webserver && airflow scheduler"]  # Commande à exécuter dans le conteneur
-
+    environment:
+      - AIRFLOW_HOME=/app
+    #command: ["bash", "-c", "airflow db init && airflow users create -f admin -l admin -p admin -u admin -e treymermier@gmx.fr -r Admin && airflow webserver -D && airflow scheduler"]
+    #command: ["bash", "-c", "cp airflow2.cfg airflow.cfg && airflow db init && airflow users create -f admin -l admin -p admin -u admin -e treymermier@gmx.fr -r Admin &&  airflow webserver -D && airflow scheduler"]
+    command: ["bash", "-c", "airflow db init && airflow webserver -D && airflow scheduler"]
   api:
     build:
       context: .
@@ -17,4 +23,7 @@ services:
       - "5000:5000"  # Exposez le port de l'API
     volumes:
       - ./API:/app/API  # Montez le dossier API dans le conteneur
+      - ./Model_stock:/app/Model_stock
     command: ["python", "/app/API/test_flask.py"]  # Commande à exécuter pour lancer l'API
+
+# cp airflow2.cfg airflow.cfg && 
