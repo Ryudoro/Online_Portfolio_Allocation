@@ -11,7 +11,7 @@ def model_data_creation(data_to_use, days_for_training = 500, days_for_testing =
     scaler = MinMaxScaler(feature_range=(0,1))
     
 
-    is_valid = is_data_valid(data_to_use, days_for_training = 100, days_for_testing =0)
+    is_valid = is_data_valid(data_to_use, days_for_training, days_for_testing)
     if not is_valid:
         return None, None, None, scaler
     
