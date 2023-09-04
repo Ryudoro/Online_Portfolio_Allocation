@@ -108,24 +108,25 @@ def predict_futur():
     days_in_futur = request_data['days_in_futur']
     model = model_from_json(request_data['model'])
     
-    print("first lastday is:", request_data['last_days_for_input'][-5])
+    # print("first lastday is:", request_data['last_days_for_input'][-5])
     last_days_for_input = np.array(request_data['last_days_for_input']).reshape(-1,1)
-    print("then lastday is:", last_days_for_input[-5])
+    # print("then lastday is:", last_days_for_input[-5])
     #scaler = request_data['scaler']
     days_for_training = request_data['days_for_training']
     name_of_compagny = request_data['name_of_compagny']
+    #To have model which has already fit
     model = load_model(os.path.join('Model_stock', 'trained_model_'+name_of_compagny.replace('.', '')+'.h5'))
     
     scaler = joblib.load(os.path.join('Model_stock', 'scaler'+ name_of_compagny.replace('.', '')+'.pkl'))
-    print(scaler.inverse_transform(last_days_for_input[-5:]))
-    print(model.summary())
-    print(scaler.get_params())
-    print("real value is: ", last_days_for_input[-5])
-    print("len of real value is: ", len(last_days_for_input))
-    print("type of real value: ", type(last_days_for_input))
-    print("shape of real value is: ", last_days_for_input.shape)
+    # print(scaler.inverse_transform(last_days_for_input[-5:]))
+    # print(model.summary())
+    # print(scaler.get_params())
+    # print("real value is: ", last_days_for_input[-5])
+    # print("len of real value is: ", len(last_days_for_input))
+    # print("type of real value: ", type(last_days_for_input))
+    # print("shape of real value is: ", last_days_for_input.shape)
     futur_prediction = predict_future(days_in_futur, model, last_days_for_input, scaler, days_for_training).reshape(-1)
-    print("prediction futur is", futur_prediction)
+    # print("prediction futur is", futur_prediction)
     response = {'futur_prediction' : futur_prediction.tolist()}    
     return jsonify(response)
 
