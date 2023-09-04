@@ -39,7 +39,7 @@ pipeline {
         
         stage('Tests') {
             steps {
-                sh 'python3 test_result.py'
+                sh 'python3 Model/test_result.py'
             }
         }
         
