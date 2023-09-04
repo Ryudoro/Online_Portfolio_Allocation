@@ -50,8 +50,8 @@ def is_data_valid(data_to_use, days_for_training, days_for_testing):
         return False
     return True
 
-
-data_to_use = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-days_for_training = 5
-days_for_testing = 3
-x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)
+if __name__ == '__main__':
+    data_to_use = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    days_for_training = 5
+    days_for_testing = 3
+    x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)

@@ -34,4 +34,5 @@ def is_input_valid(stock_symbol, period):
         return False
     return True
 
-data, data_to_use = search_input()
+if __name__ == '__main__':
+    data, data_to_use = search_input()

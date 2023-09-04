@@ -16,3 +16,12 @@ def model_creation(x_train, y_train):
     #model.save(name_of_model)
     return model
 
+if __name__ == '__main__':
+    import numpy as np
+    from model_data_creation import model_data_creation
+    data_to_use = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    days_for_training = 5
+    days_for_testing = 3
+    x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)
+
+    model = model_creation(x_train, y_train)

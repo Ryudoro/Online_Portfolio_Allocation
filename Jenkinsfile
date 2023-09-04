@@ -25,7 +25,8 @@ pipeline {
         stage('Data Preparation and Model Training') {
             steps {
                 sh 'python3 Model/input_creation.py'
-                // sh 'python model_training.py'
+                sh 'python3 Model/model_data_creation.py'
+                sh 'python3 Model/model_creation.py'
             }
         }
         
@@ -38,7 +39,7 @@ pipeline {
         
         stage('Tests') {
             steps {
-                sh 'python3 -m unittest discover tests'
+                sh 'python3 test_result.py'
             }
         }
         
