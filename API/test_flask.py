@@ -57,7 +57,6 @@ def get_stock_data():
 
 @app.route('/api/prepare_data', methods=['POST'])
 def prepare_data():
-    print("a")
     #request_data = request.args.get()
     request_data = request.get_json()
     data_to_use = np.array(request_data['data_to_use'])
@@ -67,7 +66,7 @@ def prepare_data():
     
     x_train, y_train, X_test, scaler = model_data_creation(data_to_use, days_for_training, days_for_testing)
 
-    scaler_name = os.path.join(global_dir2, f"Model_stock/scaler{name_of_compagny.replace('.', '')}.pkl")
+    scaler_name = "Model_stock/scaler{name_of_compagny.replace('.', '')}.pkl"
     joblib.dump(scaler, scaler_name)
     response = {
         'x_train': x_train.tolist(),
@@ -108,14 +107,25 @@ def predict_futur():
     request_data = request.get_json()
     days_in_futur = request_data['days_in_futur']
     model = model_from_json(request_data['model'])
-    last_days_for_input = np.array(request_data['last_days_for_input'])
+    
+    print("first lastday is:", request_data['last_days_for_input'][-5])
+    last_days_for_input = np.array(request_data['last_days_for_input']).reshape(-1,1)
+    print("then lastday is:", last_days_for_input[-5])
     #scaler = request_data['scaler']
     days_for_training = request_data['days_for_training']
     name_of_compagny = request_data['name_of_compagny']
+    model = load_model(os.path.join('Model_stock', 'trained_model_'+name_of_compagny.replace('.', '')+'.h5'))
     
     scaler = joblib.load(os.path.join('Model_stock', 'scaler'+ name_of_compagny.replace('.', '')+'.pkl'))
-    futur_prediction = predict_future(days_in_futur, model, last_days_for_input, scaler, days_for_training)
-    
+    print(scaler.inverse_transform(last_days_for_input[-5:]))
+    print(model.summary())
+    print(scaler.get_params())
+    print("real value is: ", last_days_for_input[-5])
+    print("len of real value is: ", len(last_days_for_input))
+    print("type of real value: ", type(last_days_for_input))
+    print("shape of real value is: ", last_days_for_input.shape)
+    futur_prediction = predict_future(days_in_futur, model, last_days_for_input, scaler, days_for_training).reshape(-1)
+    print("prediction futur is", futur_prediction)
     response = {'futur_prediction' : futur_prediction.tolist()}    
     return jsonify(response)
 

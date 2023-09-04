@@ -2,23 +2,29 @@
 import streamlit as st
 import requests
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import sys
 import os
 import datetime as dt
 from tensorflow.keras.models import model_from_json
+import pandas as pd
+import numpy as np
+import mplfinance as fplt
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
-global_dir = '/home/project/Documents/Online_Portfolio_Allocation'
+global_dir = '/home/supersymmetry/Documents/Online_Portfolio_Allocation'
 sys.path.append(global_dir)
+from Stats.statistics import bollinger
 
 # Définir l'URL de votre API FastAPI ou Flask
 API_URL = "http://0.0.0.0:5000/api"  # Remplacez par l'URL de votre API
 
 # option_action = ("ALO.PA", "GOOGL")
-option_action = ["ALO.PA"]
+option_action = ["ALO.PA", "GOOGL"]
 if 'mode' not in locals():
     mode = "stastistical"
     
-days_for_training = 100
+days_for_training = 500
 days_for_testing = 0
 
 # def save_model(model, model_name):
@@ -80,18 +86,18 @@ st.write("""Bienvenu sur notre site, n'hesiter pas a utiliser ce site pour vos b
          d'une entreprise avant d'en acheter ses actions.""")
 
 # Saisie de l'utilisateur
-user_input = st.text_input("Entrez votre requête:")
-if st.button("Rechercher"):
-    if user_input:
-        data = get_data_from_api(user_input)
-        if data:
-            data_to_use = data['data_to_use']
-            st.write("Résultats:")
-            fig, ax = plt.subplots(figsize = (10,8))
-            data_plot = ax.plot(data_to_use)
-            st.pyplot(fig)
-        else:
-            st.write("Aucune donnée trouvée.")
+# user_input = st.text_input("Entrez votre requête:")
+# if st.button("Rechercher"):
+#     if user_input:
+#         data = get_data_from_api(user_input)
+#         if data:
+#             data_to_use = data['data_to_use']
+#             st.write("Résultats:")
+#             fig, ax = plt.subplots(figsize = (10,8))
+#             data_plot = ax.plot(data_to_use)
+#             st.pyplot(fig)
+#         else:
+#             st.write("Aucune donnée trouvée.")
             
 fig, ax = plt.subplots(figsize = (10,8))
 
@@ -108,6 +114,7 @@ with st.sidebar:
                                      index = 0,
                                      key = 'mode')
     
+    data_choice = st.selectbox("Période d'anaylse", options = ("7j", "1m", "6m", "1y", "5y"), index = 0, key = 'date')
     if mode == "prediction":
         days_of_predictions = st.slider("How much days in advance do you want to know the prediction", 0, 100, 7, 1)
         
@@ -117,14 +124,15 @@ with st.sidebar:
                                      options=("mean", "bollinger"),
                                      index = 0,
                                      key = 'statistical')
-    if st.button("show graph"):
-        data = get_data_from_api(name_of_compagny)
         
-        if data:
-            data_to_use = data['data_to_use']
-            data_all = data['stock_data']
-            Date = data_all['Date']
-            data_plot = ax.plot(Date.values(), data_to_use)
+    # if st.button("show graph"):
+    #     data = get_data_from_api(name_of_compagny)
+        
+    #     if data:
+    #         data_to_use = data['data_to_use']
+    #         data_all = data['stock_data']
+    #         Date = data_all['Date']
+    #         data_plot = ax.plot(Date.values(), data_to_use)
             
             
     
@@ -151,7 +159,7 @@ with st.sidebar:
 @st.cache_resource()
 def load_models():
 
-    days_for_training = 100
+    days_for_training = 500
     days_for_testing = 0
 
     data_list = []
@@ -176,12 +184,191 @@ def load_models():
    
 model_list,data_list, data_to_use_list, X_train_list, y_train_list = load_models()
 
+plot_tab, result_tab, resume_tab = st.tabs(["Résultats", "Détails", "Project Info"])
 
-if name_of_compagny == 'ALO.PA':
-    model = model_from_json(model_list[0])
-    model.summary()
-    if mode == 'prediction':
-        futur_prediction = prediction_futur(days_of_predictions, model_list[0], X_train_list[0][-1], days_for_training, name_of_compagny)
+with plot_tab:
     
-        st.write(futur_prediction)
-st.pyplot(fig)
+    if name_of_compagny == 'ALO.PA':
+        model = model_from_json(model_list[0])
+        model.summary()
+        data_range = data_to_use_list[0]
+        data = pd.DataFrame(data_list[0])
+        data['Date'] = pd.to_datetime(data['Date'])
+        data = data.set_index('Date')
+        
+        fig, ax = plt.subplots(figsize = (10,8))
+        
+        # Filtrez les données en fonction de la durée sélectionnée
+        if data_choice == "7j":
+            filtered_data = data[-7:]  # Dernière semaine
+            fig.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+        elif data_choice == "1m":
+            fig.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+            filtered_data = data[-30:]  # Dernier mois
+        elif data_choice == "6m":
+            fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+            filtered_data = data[-180:]  # Derniers 6 mois
+        elif data_choice == "1y":
+            fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+            filtered_data = data[-365:]  # Dernière année
+        elif data_choice == "5y":
+            fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+            filtered_data = data  # 5 ans complets
+        
+        data_index = pd.to_datetime(filtered_data.index)
+
+        
+        # fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+        # fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        plt.xticks(rotation = 45)
+        
+        if mode == 'prediction':
+            futur_prediction = prediction_futur(days_of_predictions, model_list[0], X_train_list[0][-1], days_for_training, name_of_compagny)
+            last_date = filtered_data.index[-1]
+            date_index_future = pd.date_range(start=last_date, periods=days_of_predictions+1)
+
+            futur_pred = np.array(list(futur_prediction.values())).reshape(-1)
+
+
+            ax.plot(date_index_future, futur_pred , color='green', label='Prix prédit') 
+        
+            #st.write(futur_prediction['futur_prediction'])
+            
+        if mode == 'statistical':
+            if stats == 'bollinger':
+
+                boll_down, boll_up = bollinger(filtered_data['Close'])
+                
+                if len(filtered_data) > len(boll_down):
+                    indices = np.linspace(0,len(filtered_data)-1, len(boll_down), dtype=int)
+                    filtered_data_2 = filtered_data.iloc[indices]
+                ax.plot(pd.to_datetime(filtered_data_2.index), boll_down, label = 'Bollinger band down')
+                ax.plot(pd.to_datetime(filtered_data_2.index), boll_up, label = 'Bollinger band up')
+                
+        ax.plot(data_index, filtered_data['Close'], label = 'Cours de clôture')
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Prix de clôture')
+        ax.set_title("Evolution du cours de l'action ALO.PA")
+        ax.legend()
+        ax.grid(True)
+        
+        fig2, ax2 = plt.subplots(figsize = (10,8))
+        
+        ax2.bar(data_index, filtered_data['Volume'], label ='Volume')
+        ax2.set_xlabel('Date')
+        ax2.set_ylabel('Volume')
+        ax2.set_title("Evolution du volume de l'action ALO.PA")
+        
+        # fig3, ax3 = plt.subplots(figsize = (10,8))
+        
+        # ax3.stem(data_index, filtered_data['Volume'], label ='Volume')
+        # ax3.set_xlabel('Date')
+        # ax3.set_ylabel('Volume')
+        # ax3.set_title("Evolution du volume de l'action ALO.PA")
+        
+        
+        ax4 = fplt.plot(filtered_data, volume = True, ylabel = 'price', type = 'candle', style = 'charles')
+        
+    if name_of_compagny == 'GOOGL':
+        model = model_from_json(model_list[1])
+        model.summary()
+        data_range = data_to_use_list[1]
+        data = pd.DataFrame(data_list[1])
+        data['Date'] = pd.to_datetime(data['Date'])
+        data = data.set_index('Date')
+        
+        fig, ax = plt.subplots(figsize = (10,8))
+        
+        # Filtrez les données en fonction de la durée sélectionnée
+        if data_choice == "7j":
+            filtered_data = data[-7:]  # Dernière semaine
+            fig.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+        elif data_choice == "1m":
+            fig.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+            filtered_data = data[-30:]  # Dernier mois
+        elif data_choice == "6m":
+            fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+            filtered_data = data[-180:]  # Derniers 6 mois
+        elif data_choice == "1y":
+            fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+            filtered_data = data[-365:]  # Dernière année
+        elif data_choice == "5y":
+            fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+            fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+            filtered_data = data  # 5 ans complets
+        
+        data_index = pd.to_datetime(filtered_data.index)
+
+        
+        # fig.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+        # fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        plt.xticks(rotation = 45)
+        
+        if mode == 'prediction':
+            futur_prediction = prediction_futur(days_of_predictions, model_list[1], X_train_list[1][-1], days_for_training, name_of_compagny)
+            last_date = filtered_data.index[-1]
+            date_index_future = pd.date_range(start=last_date, periods=days_of_predictions+1)
+
+            futur_pred = np.array(list(futur_prediction.values())).reshape(-1)
+
+            ax.plot(date_index_future, futur_pred , color='green', label='Prix prédit') 
+        
+            #st.write(futur_prediction['futur_prediction'])
+            
+        if mode == 'statistical':
+            if stats == 'bollinger':
+
+                boll_down, boll_up = bollinger(filtered_data['Close'])
+
+                
+                if len(filtered_data) > len(boll_down):
+                    indices = np.linspace(0,len(filtered_data)-1, len(boll_down), dtype=int)
+                    filtered_data_2 = filtered_data.iloc[indices]
+                ax.plot(pd.to_datetime(filtered_data_2.index), boll_down, label = 'Bollinger band down')
+                ax.plot(pd.to_datetime(filtered_data_2.index), boll_up, label = 'Bollinger band up')
+                
+        ax.plot(data_index, filtered_data['Close'], label = 'Cours de clôture')
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Prix de clôture')
+        ax.set_title("Evolution du cours de l'action GOOGL")
+        ax.legend()
+        ax.grid(True)
+        
+        fig2, ax2 = plt.subplots(figsize = (10,8))
+        
+        ax2.bar(data_index, filtered_data['Volume'], label ='Volume')
+        ax2.set_xlabel('Date')
+        ax2.set_ylabel('Volume')
+        ax2.set_title("Evolution du volume de l'action GOOGL")
+        
+        # fig3, ax3 = plt.subplots(figsize = (10,8))
+        
+        # ax3.stem(data_index, filtered_data['Volume'], label ='Volume')
+        # ax3.set_xlabel('Date')
+        # ax3.set_ylabel('Volume')
+        # ax3.set_title("Evolution du volume de l'action ALO.PA")
+        
+        
+        ax4 = fplt.plot(filtered_data, volume = True, ylabel = 'price', type = 'candle', style = 'charles')
+    st.pyplot(fig)
+
+    st.pyplot(fig2)
+
+    # st.pyplot(fig3)
+
+    st.pyplot(ax4)
+    
+with result_tab:
+    st.write(data)
+    
+with resume_tab:
+    st.write("Price prediction using tensorflow")

@@ -5,7 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 # days_for_training = 500
 # days_for_testing = 1
 
-def model_data_creation(data_to_use, days_for_training = 100, days_for_testing =0):
+def model_data_creation(data_to_use, days_for_training = 500, days_for_testing =0):
 
     # Préparation des données pour l'entraînement
     scaler = MinMaxScaler(feature_range=(0,1))

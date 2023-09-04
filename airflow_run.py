@@ -8,7 +8,7 @@ import sys
 global_dir = '/home/project/Documents/Online_Portfolio_Allocation'
 sys.path.append(global_dir)
 sys.path.append(global_dir)
-global_dir2 = '/apps'
+global_dir2 = '/app'
 
 from Model.input_creation import search_input
 from Model.model_data_creation import model_data_creation
@@ -43,7 +43,7 @@ class CreateModelOperator(BaseOperator):
             model = model_creation(np.array(x_train), np.array(y_train))
             
             ti.xcom_push(f'model_{stock_symbol}', model.to_json())
-            model.save('trained_model_'+stock_symbol.replace('.','')+'.h5')
+            model.save('Model_stock/trained_model_'+stock_symbol.replace('.','')+'.h5')
         
 class StoreDataInXComOperator(BaseOperator):
 
@@ -85,7 +85,7 @@ class DataCreation(BaseOperator):
             
             ti.xcom_push(f'x_train_{stock_symbol}', x_train.tolist())
             ti.xcom_push(f'y_train_{stock_symbol}', y_train.tolist())
-            joblib.dump(scaler, 'scaler'+stock_symbol.replace('.','')+'.pkl')
+            joblib.dump(scaler, 'Model_stock/scaler'+stock_symbol.replace('.','')+'.pkl')
         
 class LoadDataOperator(BaseOperator):
 

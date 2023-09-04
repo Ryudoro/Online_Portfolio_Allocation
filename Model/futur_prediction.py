@@ -10,7 +10,7 @@ def predict_future(days_in_future, model, last_days_for_input, scaler, days_for_
         x = x.reshape((1, days_for_training, 1))
         out = model.predict(x)[0][0]
         prediction_list = np.append(prediction_list, out)
-    
+
     prediction_list = prediction_list[days_for_training-1:]
 
     # Inverse the normalization
@@ -27,9 +27,11 @@ def load_model_and_predict(model_file, days_in_future, last_days_for_input, scal
     for _ in range(days_in_future):
         x = prediction_list[-days_for_training:]
         x = x.reshape((1, days_for_training, 1))
+
         out = loaded_model.predict(x)[0][0]
+
         prediction_list = np.append(prediction_list, out)
-    
+
     prediction_list = prediction_list[days_for_training-1:]
 
     # Inverse the normalization
